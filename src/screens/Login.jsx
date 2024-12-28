@@ -19,39 +19,43 @@ const Login = () => {
     setLoading(true)
     setError('')
 
-    try {
-      const response = await fetch('http://localhost:3001/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-      console.log('here')
+    // try {
+    //   const response = await fetch('http://localhost:3001/user/login', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({ email, password }),
+    //   })
+    //   console.log('here')
 
-      const data = await response.json()
+    //   const data = await response.json()
 
-      if (response.ok) {
-        console.log('Login successful:', data)
-        alert('Login successful!')
-        setUser(data.user)
-        localStorage.setItem('token', data.token)
-        if (data.roomId) {
-          setRoomId(data.roomId)
-          navigate('/home')
-        } else {
-          navigate('/createroom')
-        }
-        // Redirect or perform other actions
-      } else {
-        setError(data.message || 'Something went wrong')
-      }
-    } catch (err) {
-      console.error('Error during login:', err)
-      setError('Failed to connect to the server')
-    } finally {
-      setLoading(false)
-    }
+    //   if (response.ok) {
+    //     console.log('Login successful:', data)
+    //     alert('Login successful!')
+    //     setUser(data.user)
+    //     localStorage.setItem('token', data.token)
+    //     if (data.roomId) {
+    //       setRoomId(data.roomId)
+    //       navigate('/home')
+    //     } else {
+    //       navigate('/createroom')
+    //     }
+    //     // Redirect or perform other actions
+    //   } else {
+    //     setError(data.message || 'Something went wrong')
+    //   }
+    // } catch (err) {
+    //   console.error('Error during login:', err)
+    //   setError('Failed to connect to the server')
+    // } finally {
+    //   setLoading(false)
+    // }
+
+    alert('Login successful!')
+    navigate('/home')
+
   }
 
   return (
