@@ -8,11 +8,7 @@ import { userState } from '../state/atoms/userAtom';
 const CreateRoom = () => {
   const user = useRecoilState(userState)
   const navigate = useNavigate()
-  useEffect(()=>{
-    if(user){
-      navigate("/home")
-    }
-  },[])
+  
   return (
     <div className="w-full flex lg:flex-row flex-col bg-[#EFF3EA]">
       <div className="lg:w-1/2 w-full bg-[#EFF3EA]">
