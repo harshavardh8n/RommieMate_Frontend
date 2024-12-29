@@ -1,9 +1,60 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import { backendPath } from '../config';
+import { userState } from '../state/atoms/userAtom';
 
 const Signup = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+  const [error, setError] = useState('');
+  const [user, setUser] = useRecoilState(userState);
+  const navigate = useNavigate();
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError('');
 
+    try {
+      const response = await fetch(`${backendPath}api/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(data.message);
+        setUser(data.user); // Set user state
+        const newToken = `Bearer ${data.token}`;
+        localStorage.setItem('token', newToken);
+      } else {
+        setError(data.message || 'Signup failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again later.');
+      console.error(err);
+    }
+  };
+
+  // Effect to run when the user state is updated
+  useEffect(() => {
+    if (user && user.id) {
+      alert('Signup successful! Redirecting...');
+      navigate("/createroom");  // Redirect to room creation page
+    }
+  }, [user]); // Dependency on 'user' to trigger when it changes
 
   return (
     <section className="bg-[#EFF3EA] dark:bg-gray-900">
@@ -16,18 +67,21 @@ const Signup = () => {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Create an account
             </h1>
-            <form className="space-y-4 md:space-y-6" action="#">
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <form className="space-y-4 md:space-y-6" onSubmit={handleSignup}>
               <div>
                 <label
-                  htmlFor="nname"
+                  htmlFor="name"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
                   Your Name
                 </label>
                 <input
                   type="text"
-                  name="nname"
-                  id="nname"
+                  name="name"
+                  id="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Henry Cavil"
                   required
@@ -44,6 +98,8 @@ const Signup = () => {
                   type="email"
                   name="email"
                   id="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="name@company.com"
                   required
@@ -60,6 +116,8 @@ const Signup = () => {
                   type="password"
                   name="password"
                   id="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   placeholder="••••••••"
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   required
@@ -85,7 +143,7 @@ const Signup = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Signup
+export default Signup;

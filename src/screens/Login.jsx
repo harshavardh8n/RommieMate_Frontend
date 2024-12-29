@@ -1,62 +1,68 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { userState } from '../state/atoms/userAtom'
-import { useRecoilState } from 'recoil'
-import { roomIdAtom } from '../state/atoms/roomIdAtom'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { userState } from '../state/atoms/userAtom';
+import { useRecoilState } from 'recoil';
+import { roomIdAtom } from '../state/atoms/roomIdAtom';
+import { backendPath } from '../config';
 
 const Login = () => {
-  const navigate = useNavigate()
-  const [email, setemail] = useState('')
-  const [password, setpassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const [user, setUser] = useRecoilState(userState) // Recoil state
-  const [roomId, setRoomId] = useRecoilState(roomIdAtom)
+  const [user, setUser] = useRecoilState(userState); // Recoil state
+  const [roomId, setRoomId] = useRecoilState(roomIdAtom);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    // try {
-    //   const response = await fetch('http://localhost:3001/user/login', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ email, password }),
-    //   })
-    //   console.log('here')
+    try {
+      const response = await fetch(`${backendPath}user/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    //   const data = await response.json()
+      const data = await response.json();
 
-    //   if (response.ok) {
-    //     console.log('Login successful:', data)
-    //     alert('Login successful!')
-    //     setUser(data.user)
-    //     localStorage.setItem('token', data.token)
-    //     if (data.roomId) {
-    //       setRoomId(data.roomId)
-    //       navigate('/home')
-    //     } else {
-    //       navigate('/createroom')
-    //     }
-    //     // Redirect or perform other actions
-    //   } else {
-    //     setError(data.message || 'Something went wrong')
-    //   }
-    // } catch (err) {
-    //   console.error('Error during login:', err)
-    //   setError('Failed to connect to the server')
-    // } finally {
-    //   setLoading(false)
-    // }
+      if (response.ok) {
+        console.log('Login successful:', data);
 
-    alert('Login successful!')
-    navigate('/home')
+        // Set user state only if user data is available
+        if (data.user) {
+          setUser(data.user);  // Set the user state properly
 
-  }
+          const newToken = `Bearer ${data.token}`;
+          localStorage.setItem('token', newToken);
+
+          alert('Login successful!');
+
+          // Now that the user state is set, proceed to the next page
+          if (data.roomId) {
+            setRoomId(data.roomId);
+            navigate('/home');
+          } else {
+            navigate('/createroom');
+          }
+        } else {
+          setError('User data is not available.');
+        }
+      } else {
+        setError(data.message || 'Something went wrong');
+      }
+    } catch (err) {
+      console.error('Error during login:', err);
+      setError('Failed to connect to the server. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="bg-[#EFF3EA] dark:bg-gray-900 h-screen">
@@ -84,9 +90,7 @@ const Login = () => {
                 placeholder="name@company.com"
                 required
                 value={email}
-                onChange={(e) => {
-                  setemail(e.target.value)
-                }}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
@@ -104,9 +108,7 @@ const Login = () => {
                 className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 required
                 value={password}
-                onChange={(e) => {
-                  setpassword(e.target.value)
-                }}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             {error && (
@@ -118,7 +120,7 @@ const Login = () => {
               type="submit"
               className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Sign in
+              {loading ? 'Loading...' : 'Sign in'}
             </button>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Don't have an account yet?{' '}
@@ -133,7 +135,7 @@ const Login = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
