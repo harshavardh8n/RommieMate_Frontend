@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { roomIdAtom } from '../state/atoms/roomIdAtom';
 import { backendPath } from '../config';
+import Loader from './Loader';
+import Skeleton from './Skeleton';
 
 const Invitation = () => {
   const [invitations, setInvitations] = useState([]);  // Start with an empty array
@@ -87,7 +89,19 @@ const Invitation = () => {
   };
 
   if (loading) {
-    return <div>Loading invitations...</div>;  // Show loading state
+    return <div className="flex flex-col h-screen">
+    <div>
+      <h2 className="m-4 font-semibold text-xl">Invitations</h2>
+    </div>
+    <div className="flex-1 mx-4 bg-white border border-gray-300 rounded-lg overflow-auto">
+    <div className="flex justify-between items-center p-4 border-b border-gray-200 m-auto">
+            <Skeleton/>  
+    </div>
+    </div>
+    <div className="m-auto p-2 rounded-lg bg-yellow-400 mt-8">
+      <button>Find rooms in your area</button>
+    </div>
+  </div>;  // Show loading state
   }
 
   return (

@@ -4,92 +4,84 @@ import { useRecoilValue } from "recoil";
 import { userState } from "../state/atoms/userAtom";
 import { useNavigate } from "react-router-dom";
 import { backendPath } from "../config";
+import Loader from "./Loader";
 
 const Create = () => {
   const [totalPeople, setTotalPeople] = useState([]);
   const [invitedPeople, setInvitedPeople] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
-
-  const user = useRecoilValue(userState)
+  const user = useRecoilValue(userState);
 
   useEffect(() => {
     const fetchIdlePeople = async () => {
+      setLoading(true); // Start loading
       try {
-        // alert("trying")
-        const token = localStorage.getItem('token')
-        const response = await axios.get(`${backendPath}api/idlePeople`,{
-          headers:{
-            Authorization: token
-          }
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${backendPath}api/idlePeople`, {
+          headers: {
+            Authorization: token,
+          },
         });
         setTotalPeople(response.data.idlePeople); // Assuming `idlePeople` is an array of objects
       } catch (err) {
         console.error("Error fetching idle people:", err.message);
         setError("Failed to load idle people.");
+      } finally {
+        setLoading(false); // End loading
       }
     };
 
     fetchIdlePeople();
   }, []);
 
-
   const handleCreate = async () => {
     try {
-      // Ensure headers include the token
       const token = localStorage.getItem("token");
       if (!token) {
         setError("User is not authenticated. Please log in.");
         return;
       }
-      console.log(user.id)
-      // Send the POST request to create a room
+
       const response = await axios.post(
         `${backendPath}api/rooms`,
         {
-          members: invitedPeople.map((person) => person._id), // Collect all invited people IDs
-          admin: user.id, // Set the admin user ID
+          members: invitedPeople.map((person) => person._id),
+          admin: user.id,
         },
         {
           headers: {
-            Authorization: token, // Attach the token in headers
+            Authorization: token,
           },
         }
       );
-  
-      // Handle success (you might want to redirect or display a success message)
-      if(response.data.success){
-      console.log("Room created successfully:", response.data);
-      alert("Room created successfully!");
-      setInvitedPeople([]); // Clear invited people after creating the room
-      navigate("/home")
-      }
 
+      if (response.data.success) {
+        alert("Room created successfully!");
+        setInvitedPeople([]);
+        navigate("/home");
+      }
     } catch (err) {
-      // Handle errors
       console.error("Error creating room:", err.message);
       setError(err.response?.data?.message || "Failed to create the room.");
     }
   };
-  
 
-  // Filter people based on the search query
   const filteredPeople = totalPeople.filter((person) =>
     person.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle inviting a person
   const handleInvite = (person) => {
-    setInvitedPeople((prev) => [...prev, person]); // Add person to invitedPeople
-    setTotalPeople((prev) => prev.filter((p) => p._id !== person._id)); // Remove person from totalPeople
+    setInvitedPeople((prev) => [...prev, person]);
+    setTotalPeople((prev) => prev.filter((p) => p._id !== person._id));
   };
 
-  // Handle removing a person from invitedPeople
   const handleRemove = (person) => {
-    setTotalPeople((prev) => [...prev, person]); // Add person back to totalPeople
-    setInvitedPeople((prev) => prev.filter((p) => p._id !== person._id)); // Remove person from invitedPeople
+    setTotalPeople((prev) => [...prev, person]);
+    setInvitedPeople((prev) => prev.filter((p) => p._id !== person._id));
   };
 
   return (
@@ -104,27 +96,38 @@ const Create = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <div className="h-44 overflow-auto mt-4 border-2 border-gray-300 bg-white rounded-lg">
-            {filteredPeople.map((person) => (
-              <div
-                key={person._id}
-                className="p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
-              >
-                <div className="flex justify-between items-center">
-                  <div className="w-3/4">
-                    <strong>Name:</strong> {person.name} <br />
-                    <strong>Email:</strong> {person.email}
-                  </div>
-                  <button
-                    className="bg-green-400 rounded-md p-1.5"
-                    onClick={() => handleInvite(person)}
-                  >
-                    Invite
-                  </button>
-                </div>
+          {loading ? (
+            
+            <div className="h-44 overflow-auto mt-4 border-2 border-gray-300 bg-white rounded-lg">
+              <div className="w-1/2 m-auto h-1/2 mt-4" >
+              <Loader text="Loading Idle People"/>
               </div>
-            ))}
-          </div>
+              
+            </div>
+             
+          ) : (
+            <div className="h-44 overflow-auto mt-4 border-2 border-gray-300 bg-white rounded-lg">
+              {filteredPeople.map((person) => (
+                <div
+                  key={person._id}
+                  className="p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="w-3/4">
+                      <strong>Name:</strong> {person.name} <br />
+                      <strong>Email:</strong> {person.email}
+                    </div>
+                    <button
+                      className="bg-green-400 rounded-md p-1.5"
+                      onClick={() => handleInvite(person)}
+                    >
+                      Invite
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="mt-4">
             <h2 className="font-semibold">Invited People</h2>
             <div className="h-44 overflow-auto mt-2 border-2 border-gray-300 bg-white rounded-lg">
@@ -151,7 +154,10 @@ const Create = () => {
           </div>
         </div>
       </div>
-      <button className="w-full lg:w-1/4 p-2 bg-amber-400 rounded-lg mx-auto" onClick={handleCreate}>
+      <button
+        className="w-full lg:w-1/4 p-2 bg-amber-400 rounded-lg mx-auto"
+        onClick={handleCreate}
+      >
         Create Room
       </button>
     </div>
