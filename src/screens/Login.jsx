@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { userState } from '../state/atoms/userAtom';
 import { useRecoilState } from 'recoil';
 import { roomIdAtom } from '../state/atoms/roomIdAtom';
@@ -124,12 +124,13 @@ const Login = () => {
             </button>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Don't have an account yet?{' '}
+              <NavLink to={"/signup"}>
               <a
-                href="/signup"
                 className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-              >
+                >
                 Sign up
               </a>
+                </NavLink>
             </p>
           </form>
         </div>
