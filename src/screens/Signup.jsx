@@ -36,7 +36,7 @@ const Signup = () => {
 
       if (data.success) {
         alert(data.message);
-        setUser(data.user); // Set user state
+        setUser(data.user);
         const newToken = `Bearer ${data.token}`;
         localStorage.setItem('token', newToken);
       } else {
@@ -48,22 +48,18 @@ const Signup = () => {
     }
   };
 
-  // Effect to run when the user state is updated
   useEffect(() => {
     if (user && user.id) {
       alert('Signup successful! Redirecting...');
-      navigate("/createroom");  // Redirect to room creation page
+      navigate("/createroom");
     }
-  }, [user]); // Dependency on 'user' to trigger when it changes
+  }, [user]);
 
   return (
-    <section className="bg-[#EFF3EA] dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-          RoomieMate
-        </a>
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+    <section className="bg-[#EFF3EA] dark:bg-gray-900 h-screen flex justify-center items-center">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700">
+          <div className="p-6 space-y-4 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Create an account
             </h1>
