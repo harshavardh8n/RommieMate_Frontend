@@ -45,7 +45,8 @@ const Login = () => {
 
           // Now that the user state is set, proceed to the next page
           if (data.roomId) {
-            setRoomId(data.roomId);
+            // alert(data.roomId)
+           setRoomId(data.roomId)
             navigate('/home');
           } else {
             navigate('/createroom');

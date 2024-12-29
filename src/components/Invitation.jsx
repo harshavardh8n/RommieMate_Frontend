@@ -110,7 +110,7 @@ const Invitation = () => {
         <h2 className="m-4 font-semibold text-xl">Invitations</h2>
       </div>
       <div className="flex-1 mx-4 bg-white border border-gray-300 rounded-lg overflow-auto">
-        {error && <div className="text-red-600 p-4 text-center">{error}</div>} {/* Show error if any */}
+        {/* {error && <div className="text-red-600 p-4 text-center">{error}</div>} Show error if any */}
         
         {invitations.length === 0 ? (
           <div className="p-4 text-center text-gray-600">No invitations found</div>
