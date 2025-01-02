@@ -47,6 +47,7 @@ const Login = () => {
           if (data.roomId) {
             // alert(data.roomId)
            setRoomId(data.roomId)
+           localStorage.setItem('roomId', data.roomId);
             navigate('/home');
           } else {
             navigate('/createroom');

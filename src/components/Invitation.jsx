@@ -76,6 +76,7 @@ const Invitation = () => {
       if (response.data.success) {
         setInvitations(invitations.filter(invite => invite._id !== inviteId));
         setRoomId(response.data.room._id);
+        localStorage.setItem('roomId', response.data.room._id);
         alert('Invitation accepted successfully!');
         navigate("/home");
       } else {

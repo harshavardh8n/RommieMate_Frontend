@@ -49,8 +49,7 @@ const Create = () => {
       const response = await axios.post(
         `${backendPath}api/rooms`,
         {
-          members: invitedPeople.map((person) => person._id),
-          admin: user.id,
+          members: invitedPeople.map((person) => person._id)
         },
         {
           headers: {
@@ -62,6 +61,7 @@ const Create = () => {
       if (response.data.success) {
         alert("Room created successfully!");
         setInvitedPeople([]);
+        localStorage.setItem('roomId', response.data.roomId);
         navigate("/home");
       }
     } catch (err) {

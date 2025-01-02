@@ -33,12 +33,14 @@ const Signup = () => {
       });
 
       const data = await response.json();
-
+      // console.log(data);
       if (data.success) {
         alert(data.message);
         setUser(data.user);
         const newToken = `Bearer ${data.token}`;
         localStorage.setItem('token', newToken);
+        // localStorage.setItem('roomId', data.roomId);
+        
       } else {
         setError(data.message || 'Signup failed. Please try again.');
       }

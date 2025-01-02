@@ -1,66 +1,81 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { backendPath } from '../config';
+import { membersAtom } from '../state/atoms/membersAtom';
+import { roommateDetailsAtom } from '../state/atoms/membersName';
 import { roomIdAtom } from '../state/atoms/roomIdAtom';
 
 const Roommates = () => {
-    // Get roomId from recoil state
+    // Get roomId from Recoil state
     const roomId = useRecoilValue(roomIdAtom);
-
-    // State to hold the list of roommates
-    const [Roommates, setRoommates] = useState([]);
+    const setMembers = useSetRecoilState(membersAtom); // To update global membersAtom
+    const setRoommateDetails = useSetRecoilState(roommateDetailsAtom); // Correct Recoil atom
+    const [roommates, setRoommates] = useState([]); // Fixed naming to camelCase
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // Function to fetch roommates
     const getRoommates = async () => {
         try {
-            const token = localStorage.getItem('token');  // Corrected localStorage reference
+            const token = localStorage.getItem('token');
             if (!token) {
                 setError("No token found.");
                 setLoading(false);
                 return;
             }
- 
+
             const response = await axios.get(`${backendPath}api/room`, {
-                headers: {  
-                    Authorization: token // Ensure token is prefixed with 'Bearer'
+                headers: {
+                    Authorization: token// Ensure proper Authorization format
                 }
             });
 
             if (response.status === 200) {
-                setError(false)
-                setRoommates(response.data.members); // Set the state with fetched data
+                const { members } = response.data; // Destructure members
+                setRoommates(members); // Update local state
+                setMembers(members); // Update Recoil state for membersAtom
+                setRoommateDetails(members); // Update Recoil state for roommateDetailsAtom
+                setError(null); // Clear error if successful
             }
         } catch (err) {
             setError("Failed to fetch roommates.");
         } finally {
-            setLoading(false);  // Stop loading once data is fetched
-            
+            setLoading(false); // Stop loading
         }
     };
 
-    // Fetch the roommates when the component mounts
+    // Fetch roommates on component mount or when roomId changes
     useEffect(() => {
-        getRoommates();
-    }, [roomId]);  // Dependency array ensures the effect runs when roomId changes
+        const roomIdsend = roomId || localStorage.getItem('roomId')
+        if (roomIdsend) {
+            getRoommates();
+        }
+    }, [roomId]);
 
     return (
         <div className="border-t-gray-300">
-            {/* Loading and Error Handling */}
-            {/* {loading && <p>Loading roommates...</p>} */}
+            {/* Error and Loading */}
             {error && <p className="text-red-500">{error}</p>}
-
-            {/* Roommates List */}
-            <h1 class="text-xl font-semibold ml-24 mt-7 mb-5 text-[#809539]">Room Mates</h1>
-            <div className="w-3/5 m-auto flex flex-col gap-1">
-                {loading? <p>Loading roommates...</p>: Roommates.map((roomie) => (
-                    <div key={roomie._id} className="p-2 border-b border-gray-200 bg-white">
-                        {roomie.name}
+            {loading ? (
+                <p className="text-center">Loading roommates...</p>
+            ) : (
+                <>
+                    <h1 className="text-xl font-semibold ml-24 mt-7 mb-5 text-[#809539]">
+                        Room Mates
+                    </h1>
+                    <div className="w-3/5 m-auto flex flex-col gap-1">
+                        {roommates.map((roomie) => (
+                            <div
+                                key={roomie._id}
+                                className="p-2 border-b border-gray-200 bg-white"
+                            >
+                                {roomie.name}
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
+                </>
+            )}
         </div>
     );
 };
